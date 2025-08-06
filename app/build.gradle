@@ -1,0 +1,57 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.example.sms2mail'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.sms2mail"
+        minSdk 27
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packaging {
+        resources {
+            excludes += 'META-INF/NOTICE.md'       // This line fixes your specific error
+            excludes += 'META-INF/LICENSE.md'       // This line fixes your specific error
+        }
+        dex {
+            useLegacyPackaging = false
+        }
+    }
+}
+
+dependencies {
+
+    implementation libs.appcompat
+    implementation libs.material
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+
+//    implementation 'androidx.appcompat:appcompat:1.6.1'
+//    implementation 'com.google.android.material:material:1.9.0'
+//    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    // JavaMail API for Android
+    implementation 'com.sun.mail:android-mail:1.6.7'
+    implementation 'com.sun.mail:android-activation:1.6.7'
+
+}
