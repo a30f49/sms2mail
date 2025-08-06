@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 123;
-    private EditText etSenderEmail, etSenderPassword, etReceiverEmail;
+    private EditText etSenderEmail, etSenderPassword, etReceiverEmail, etSmtpHost, etSmtpPort;
     private Button btnSave, btnStartService, btnStopService;
     
     @Override
@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
         etSenderEmail = findViewById(R.id.etSenderEmail);
         etSenderPassword = findViewById(R.id.etSenderPassword);
         etReceiverEmail = findViewById(R.id.etReceiverEmail);
+        etSmtpHost = findViewById(R.id.etSmtpHost);
+        etSmtpPort = findViewById(R.id.etSmtpPort);
         btnSave = findViewById(R.id.btnSave);
         btnStartService = findViewById(R.id.btnStartService);
         btnStopService = findViewById(R.id.btnStopService);
@@ -68,8 +70,10 @@ public class MainActivity extends AppCompatActivity {
         String senderEmail = etSenderEmail.getText().toString().trim();
         String senderPassword = etSenderPassword.getText().toString().trim();
         String receiverEmail = etReceiverEmail.getText().toString().trim();
+        String smtpHost = etSmtpHost.getText().toString().trim();
+        String smtpPort = etSmtpPort.getText().toString().trim();
         
-        if (senderEmail.isEmpty() || senderPassword.isEmpty() || receiverEmail.isEmpty()) {
+        if (senderEmail.isEmpty() || senderPassword.isEmpty() || receiverEmail.isEmpty() || smtpHost.isEmpty() || smtpPort.isEmpty()) {
             Toast.makeText(this, "请填写所有字段", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -80,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
             .putString("sender_email", senderEmail)
             .putString("sender_password", senderPassword)
             .putString("receiver_email", receiverEmail)
+            .putString("smtp_host", smtpHost)
+            .putString("smtp_port", smtpPort)
             .apply();
             
         Toast.makeText(this, "设置已保存", Toast.LENGTH_SHORT).show();
@@ -90,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
         etSenderEmail.setText(prefs.getString("sender_email", ""));
         etSenderPassword.setText(prefs.getString("sender_password", ""));
         etReceiverEmail.setText(prefs.getString("receiver_email", ""));
+        etSmtpHost.setText(prefs.getString("smtp_host", "smtp.gmail.com"));
+        etSmtpPort.setText(prefs.getString("smtp_port", "587"));
     }
     
     private void startSmsService() {
