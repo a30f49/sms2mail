@@ -30,21 +30,23 @@ public class EmailService extends IntentService {
         String senderEmail = prefs.getString("sender_email", "");
         String senderPassword = prefs.getString("sender_password", "");
         String receiverEmail = prefs.getString("receiver_email", "");
+        String smtpHost = prefs.getString("smtp_host", "");
+        String smtpPort = prefs.getString("smtp_port", "");
         
-        if (senderEmail.isEmpty() || senderPassword.isEmpty() || receiverEmail.isEmpty()) {
+        if (senderEmail.isEmpty() || senderPassword.isEmpty() || receiverEmail.isEmpty() || smtpHost.isEmpty() || smtpPort.isEmpty()) {
             Log.e(TAG, "邮件设置不完整");
             return;
         }
         
-        sendEmail(senderEmail, senderPassword, receiverEmail, smsSender, smsMessage);
+        sendEmail(senderEmail, senderPassword, receiverEmail, smtpHost, smtpPort, smsSender, smsMessage);
     }
     
     private void sendEmail(String senderEmail, String senderPassword, String receiverEmail, 
-                          String smsSender, String smsMessage) {
+                          String smtpHost, String smtpPort, String smsSender, String smsMessage) {
         try {
             Properties props = new Properties();
-            props.put("mail.smtp.host", "smtp.gmail.com"); // 根据需要修改SMTP服务器
-            props.put("mail.smtp.port", "587");
+            props.put("mail.smtp.host", smtpHost);
+            props.put("mail.smtp.port", smtpPort);
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
             
