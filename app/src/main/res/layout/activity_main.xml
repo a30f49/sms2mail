@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="match_parent">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="短信转邮件设置"
+        android:text="@string/title_sms_to_email_settings"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_marginBottom="24dp" />
@@ -22,8 +26,9 @@
             android:id="@+id/etSenderEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="发送邮箱"
-            android:inputType="textEmailAddress" />
+            android:hint="@string/hint_sender_email"
+            android:inputType="textEmailAddress"
+            android:autofillHints="emailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -35,8 +40,9 @@
             android:id="@+id/etSenderPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="邮箱密码/应用专用密码"
-            android:inputType="textPassword" />
+            android:hint="@string/hint_email_password"
+            android:inputType="textPassword"
+            android:autofillHints="password" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -48,22 +54,23 @@
             android:id="@+id/etReceiverEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="接收邮箱"
-            android:inputType="textEmailAddress" />
+            android:hint="@string/hint_receiver_email"
+            android:inputType="textEmailAddress"
+            android:autofillHints="emailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnSave"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="保存设置"
+        android:text="@string/btn_save_settings"
         android:layout_marginBottom="16dp" />
 
     <Button
         android:id="@+id/btnStartService"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="启动监控服务"
+        android:text="@string/btn_start_monitoring"
         android:backgroundTint="#4CAF50"
         android:layout_marginBottom="8dp" />
 
@@ -71,7 +78,19 @@
         android:id="@+id/btnStopService"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="停止监控服务"
+        android:text="@string/btn_stop_monitoring"
         android:backgroundTint="#F44336" />
 
+    <TextView
+        android:id="@+id/tvServiceStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/status_service_stopped"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal" />
+
 </LinearLayout>
+
+</ScrollView>

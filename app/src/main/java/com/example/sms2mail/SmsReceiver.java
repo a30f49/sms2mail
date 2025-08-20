@@ -22,7 +22,7 @@ public class SmsReceiver extends BroadcastReceiver {
                         String sender = sms.getDisplayOriginatingAddress();
                         String message = sms.getDisplayMessageBody();
                         
-                        Log.d(TAG, "收到短信 - 发送者: " + sender + ", 内容: " + message);
+                        Log.d(TAG, context.getString(R.string.log_sms_received, sender, message));
                         
                         // 启动邮件发送服务
                         Intent emailIntent = new Intent(context, EmailService.class);

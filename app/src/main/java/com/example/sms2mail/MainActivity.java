@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 123;
     private EditText etSenderEmail, etSenderPassword, etReceiverEmail;
     private Button btnSave, btnStartService, btnStopService;
+    private android.widget.TextView tvServiceStatus;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +34,11 @@ public class MainActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btnSave);
         btnStartService = findViewById(R.id.btnStartService);
         btnStopService = findViewById(R.id.btnStopService);
+        tvServiceStatus = findViewById(R.id.tvServiceStatus);
         
         // 加载保存的设置
         loadSettings();
+        updateServiceStatus();
     }
     
     private void setupClickListeners() {
@@ -70,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         String receiverEmail = etReceiverEmail.getText().toString().trim();
         
         if (senderEmail.isEmpty() || senderPassword.isEmpty() || receiverEmail.isEmpty()) {
-            Toast.makeText(this, "请填写所有字段", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.msg_fill_all_fields, Toast.LENGTH_SHORT).show();
             return;
         }
         
@@ -82,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
             .putString("receiver_email", receiverEmail)
             .apply();
             
-        Toast.makeText(this, "设置已保存", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.msg_settings_saved, Toast.LENGTH_SHORT).show();
     }
     
     private void loadSettings() {
@@ -95,12 +98,40 @@ public class MainActivity extends AppCompatActivity {
     private void startSmsService() {
         Intent serviceIntent = new Intent(this, SmsMonitorService.class);
         startForegroundService(serviceIntent);
-        Toast.makeText(this, "短信监控服务已启动", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.msg_service_started, Toast.LENGTH_SHORT).show();
+        tvServiceStatus.setText(R.string.status_service_running);
     }
     
     private void stopSmsService() {
         Intent serviceIntent = new Intent(this, SmsMonitorService.class);
         stopService(serviceIntent);
-        Toast.makeText(this, "短信监控服务已停止", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.msg_service_stopped, Toast.LENGTH_SHORT).show();
+        updateServiceStatus();
+    }
+    
+    private void updateServiceStatus() {
+        // 简单的状态显示，实际应用中可以检查服务是否真正运行
+        tvServiceStatus.setText(R.string.status_service_stopped);
+    }
+    
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+            
+            if (allGranted) {
+                Toast.makeText(this, R.string.msg_permissions_required, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, R.string.msg_permissions_denied, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

@@ -32,7 +32,7 @@ public class EmailService extends IntentService {
         String receiverEmail = prefs.getString("receiver_email", "");
         
         if (senderEmail.isEmpty() || senderPassword.isEmpty() || receiverEmail.isEmpty()) {
-            Log.e(TAG, "邮件设置不完整");
+            Log.e(TAG, getString(R.string.log_email_settings_incomplete));
             return;
         }
         
@@ -58,20 +58,20 @@ public class EmailService extends IntentService {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(senderEmail));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(receiverEmail));
-            message.setSubject("新短信通知 - 来自 " + smsSender);
+            message.setSubject(getString(R.string.email_subject_prefix, smsSender));
             
-            String emailBody = "您收到一条新短信:\n\n" +
-                             "发送者: " + smsSender + "\n" +
-                             "内容: " + smsMessage + "\n" +
-                             "时间: " + new java.util.Date();
+            String emailBody = getString(R.string.email_body_template, 
+                smsSender, smsMessage, new java.util.Date().toString());
             
             message.setText(emailBody);
             
             Transport.send(message);
-            Log.d(TAG, "邮件发送成功");
+            Log.d(TAG, getString(R.string.log_email_sent_success));
             
         } catch (MessagingException e) {
-            Log.e(TAG, "邮件发送失败: " + e.getMessage());
+            Log.e(TAG, getString(R.string.log_email_sent_failed, e.getMessage()));
+        } catch (Exception e) {
+            Log.e(TAG, getString(R.string.log_email_sent_failed, e.getMessage()));
         }
     }
 }

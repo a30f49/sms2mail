@@ -16,3 +16,6 @@ local.properties
 .idea/
 .vscode/
 
+# APK文件
+*.apk
+*.aab

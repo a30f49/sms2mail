@@ -16,10 +16,32 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // 签名配置
+    signingConfigs {
+        release {
+            def keystorePropertiesFile = rootProject.file("signing.properties")
+            def keystoreProperties = new Properties()
+            if (keystorePropertiesFile.exists()) {
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+            }
+            
+            keyAlias project.findProperty('KEY_ALIAS') ?: 'sms2mail-key'
+            keyPassword keystoreProperties['KEYSTORE_PASSWORD'] ?: System.getenv('KEYSTORE_PASSWORD')
+            storeFile file('../' + (project.findProperty('KEYSTORE_FILE') ?: 'sms2mail-release.keystore'))
+            storePassword keystoreProperties['KEYSTORE_PASSWORD'] ?: System.getenv('KEYSTORE_PASSWORD')
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
         }
     }
     compileOptions {

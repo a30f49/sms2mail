@@ -6,7 +6,6 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
 
@@ -48,23 +47,21 @@ public class SmsMonitorService extends Service {
     }
     
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID,
-                "短信监控服务",
-                NotificationManager.IMPORTANCE_LOW
-            );
-            channel.setDescription("监控短信并发送邮件通知");
-            
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
-        }
+        NotificationChannel channel = new NotificationChannel(
+            CHANNEL_ID,
+            getString(R.string.notification_channel_name),
+            NotificationManager.IMPORTANCE_LOW
+        );
+        channel.setDescription(getString(R.string.notification_channel_desc));
+        
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        manager.createNotificationChannel(channel);
     }
     
     private Notification createNotification() {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("短信转邮件服务")
-            .setContentText("正在监控短信...")
+            .setContentTitle(getString(R.string.notification_title))
+            .setContentText(getString(R.string.notification_text))
             .setSmallIcon(android.R.drawable.ic_dialog_email)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build();

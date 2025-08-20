@@ -1,3 +1,38 @@
 <resources>
-    <string name="app_name">sms2mail</string>
+    <string name="app_name">短信转邮件</string>
+    
+    <!-- 主界面字符串 -->
+    <string name="title_sms_to_email_settings">短信转邮件设置</string>
+    <string name="hint_sender_email">发送邮箱</string>
+    <string name="hint_email_password">邮箱密码/应用专用密码</string>
+    <string name="hint_receiver_email">接收邮箱</string>
+    <string name="btn_save_settings">保存设置</string>
+    <string name="btn_start_monitoring">启动监控服务</string>
+    <string name="btn_stop_monitoring">停止监控服务</string>
+    
+    <!-- 提示消息 -->
+    <string name="msg_fill_all_fields">请填写所有字段</string>
+    <string name="msg_settings_saved">设置已保存</string>
+    <string name="msg_service_started">短信监控服务已启动</string>
+    <string name="msg_service_stopped">短信监控服务已停止</string>
+    <string name="msg_permissions_required">需要短信和网络权限才能正常工作</string>
+    <string name="msg_permissions_denied">权限被拒绝，应用可能无法正常工作</string>
+    
+    <!-- 状态文本 -->
+    <string name="status_service_running">服务状态: 运行中</string>
+    <string name="status_service_stopped">服务状态: 已停止</string>
+    
+    <!-- 服务相关 -->
+    <string name="notification_channel_name">短信监控服务</string>
+    <string name="notification_channel_desc">监控短信并发送邮件通知</string>
+    <string name="notification_title">短信转邮件服务</string>
+    <string name="notification_text">正在监控短信...</string>
+    
+    <!-- 邮件相关 -->
+    <string name="email_subject_prefix">新短信通知 - 来自 %1$s</string>
+    <string name="email_body_template">您收到一条新短信:\n\n发送者: %1$s\n内容: %2$s\n时间: %3$s</string>
+    <string name="log_email_sent_success">邮件发送成功</string>
+    <string name="log_email_sent_failed">邮件发送失败: %1$s</string>
+    <string name="log_email_settings_incomplete">邮件设置不完整</string>
+    <string name="log_sms_received">收到短信 - 发送者: %1$s, 内容: %2$s</string>
 </resources>
