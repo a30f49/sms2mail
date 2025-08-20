@@ -2,15 +2,17 @@
     <!-- Base application theme. -->
     <style name="Theme.Sms2mail" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimary">@color/system_bar_color</item>
+        <item name="colorPrimaryVariant">@color/system_bar_color</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorSecondaryVariant">@color/teal_700</item>
         <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Status bar color - 与ActionBar保持一致 -->
+        <item name="android:statusBarColor">@color/system_bar_color</item>
+        <!-- 确保系统栏背景绘制 -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <!-- Customize your theme here. -->
     </style>
 </resources>

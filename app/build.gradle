@@ -58,6 +58,22 @@ android {
             useLegacyPackaging = false
         }
     }
+
+    // 自定义APK输出名称
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            def buildType = variant.buildType.name
+            def versionName = variant.versionName
+            def versionCode = variant.versionCode
+            def date = new Date().format('yyyyMMdd')
+            
+            if (buildType == "release") {
+                outputFileName = "sms2mail-v${versionName}-${date}-release.apk"
+            } else if (buildType == "debug") {
+                outputFileName = "sms2mail-v${versionName}-${date}-debug.apk"
+            }
+        }
+    }
 }
 
 dependencies {

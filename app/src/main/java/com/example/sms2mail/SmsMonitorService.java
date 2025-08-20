@@ -7,11 +7,18 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 public class SmsMonitorService extends Service {
+    private static final String TAG = "SmsMonitorService";
     private static final String CHANNEL_ID = "SMS_MONITOR_CHANNEL";
     private static final int NOTIFICATION_ID = 1;
+    
+    // 广播Action
+    public static final String ACTION_SERVICE_STATUS = "com.example.sms2mail.SERVICE_STATUS";
+    public static final String EXTRA_SERVICE_RUNNING = "service_running";
+    
     private SmsReceiver smsReceiver;
     
     @Override
@@ -23,6 +30,7 @@ public class SmsMonitorService extends Service {
     
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "服务启动");
         startForeground(NOTIFICATION_ID, createNotification());
         
         // 注册短信接收器
@@ -30,15 +38,32 @@ public class SmsMonitorService extends Service {
         filter.setPriority(1000);
         registerReceiver(smsReceiver, filter);
         
+        // 发送服务状态广播
+        sendServiceStatusBroadcast(true);
+        
         return START_STICKY; // 服务被杀死后自动重启
     }
     
     @Override
     public void onDestroy() {
+        Log.d(TAG, "服务停止");
         super.onDestroy();
         if (smsReceiver != null) {
-            unregisterReceiver(smsReceiver);
+            try {
+                unregisterReceiver(smsReceiver);
+            } catch (IllegalArgumentException e) {
+                Log.w(TAG, "接收器未注册或已注销");
+            }
         }
+        
+        // 发送服务状态广播
+        sendServiceStatusBroadcast(false);
+    }
+    
+    private void sendServiceStatusBroadcast(boolean isRunning) {
+        Intent broadcast = new Intent(ACTION_SERVICE_STATUS);
+        broadcast.putExtra(EXTRA_SERVICE_RUNNING, isRunning);
+        sendBroadcast(broadcast);
     }
     
     @Override

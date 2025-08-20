@@ -16,10 +16,18 @@ public class EmailConfigManager {
     private static final String KEY_SENDER_EMAIL = "sender_email";
     private static final String KEY_SENDER_PASSWORD = "sender_password";
     private static final String KEY_RECEIVER_EMAIL = "receiver_email";
+    private static final String KEY_PROVIDER = "provider";
     private static final String KEY_SMTP_HOST = "smtp_host";
     private static final String KEY_SMTP_PORT = "smtp_port";
-    private static final String KEY_USE_TLS = "use_tls";
+    private static final String KEY_SMTP_USE_TLS = "smtp_use_tls";
+    private static final String KEY_SMTP_USE_SSL = "smtp_use_ssl";
+    private static final String KEY_POP3_HOST = "pop3_host";
+    private static final String KEY_POP3_PORT = "pop3_port";
+    private static final String KEY_POP3_USE_SSL = "pop3_use_ssl";
     private static final String KEY_CONFIG_COMPLETED = "config_completed";
+    
+    // 兼容性键名
+    private static final String KEY_USE_TLS = "use_tls";
     
     // 默认SMTP配置
     private static final String DEFAULT_SMTP_HOST = "smtp.gmail.com";
@@ -43,14 +51,19 @@ public class EmailConfigManager {
             editor.putString(KEY_SENDER_EMAIL, config.getSenderEmail());
             editor.putString(KEY_SENDER_PASSWORD, config.getSenderPassword());
             editor.putString(KEY_RECEIVER_EMAIL, config.getReceiverEmail());
+            editor.putString(KEY_PROVIDER, config.getProvider().name());
             editor.putString(KEY_SMTP_HOST, config.getSmtpHost());
             editor.putString(KEY_SMTP_PORT, config.getSmtpPort());
-            editor.putBoolean(KEY_USE_TLS, config.isUseTls());
+            editor.putBoolean(KEY_SMTP_USE_TLS, config.isSmtpUseTls());
+            editor.putBoolean(KEY_SMTP_USE_SSL, config.isSmtpUseSSL());
+            editor.putString(KEY_POP3_HOST, config.getPop3Host());
+            editor.putString(KEY_POP3_PORT, config.getPop3Port());
+            editor.putBoolean(KEY_POP3_USE_SSL, config.isPop3UseSSL());
             editor.putBoolean(KEY_CONFIG_COMPLETED, true);
             
             boolean success = editor.commit();
             if (success) {
-                Log.d(TAG, "邮件配置保存成功");
+                Log.d(TAG, "邮件配置保存成功: " + config.getProvider().getDisplayName());
             } else {
                 Log.e(TAG, "邮件配置保存失败");
             }
@@ -69,9 +82,31 @@ public class EmailConfigManager {
         config.setSenderEmail(prefs.getString(KEY_SENDER_EMAIL, ""));
         config.setSenderPassword(prefs.getString(KEY_SENDER_PASSWORD, ""));
         config.setReceiverEmail(prefs.getString(KEY_RECEIVER_EMAIL, ""));
-        config.setSmtpHost(prefs.getString(KEY_SMTP_HOST, DEFAULT_SMTP_HOST));
-        config.setSmtpPort(prefs.getString(KEY_SMTP_PORT, DEFAULT_SMTP_PORT));
-        config.setUseTls(prefs.getBoolean(KEY_USE_TLS, DEFAULT_USE_TLS));
+        
+        // 获取邮件服务商
+        String providerName = prefs.getString(KEY_PROVIDER, EmailConfig.EmailProvider.GMAIL.name());
+        try {
+            EmailConfig.EmailProvider provider = EmailConfig.EmailProvider.valueOf(providerName);
+            config.setProvider(provider);
+        } catch (IllegalArgumentException e) {
+            config.setProvider(EmailConfig.EmailProvider.GMAIL);
+        }
+        
+        // 获取SMTP配置（如果是自定义或需要覆盖默认值）
+        config.setSmtpHost(prefs.getString(KEY_SMTP_HOST, config.getSmtpHost()));
+        config.setSmtpPort(prefs.getString(KEY_SMTP_PORT, config.getSmtpPort()));
+        config.setSmtpUseTls(prefs.getBoolean(KEY_SMTP_USE_TLS, config.isSmtpUseTls()));
+        config.setSmtpUseSSL(prefs.getBoolean(KEY_SMTP_USE_SSL, config.isSmtpUseSSL()));
+        
+        // 获取POP3配置
+        config.setPop3Host(prefs.getString(KEY_POP3_HOST, config.getPop3Host()));
+        config.setPop3Port(prefs.getString(KEY_POP3_PORT, config.getPop3Port()));
+        config.setPop3UseSSL(prefs.getBoolean(KEY_POP3_USE_SSL, config.isPop3UseSSL()));
+        
+        // 兼容性处理
+        if (prefs.contains(KEY_USE_TLS) && !prefs.contains(KEY_SMTP_USE_TLS)) {
+            config.setSmtpUseTls(prefs.getBoolean(KEY_USE_TLS, DEFAULT_USE_TLS));
+        }
         
         return config;
     }
@@ -93,7 +128,26 @@ public class EmailConfigManager {
                !config.getSenderPassword().trim().isEmpty() &&
                !config.getReceiverEmail().trim().isEmpty() &&
                !config.getSmtpHost().trim().isEmpty() &&
-               !config.getSmtpPort().trim().isEmpty();
+               !config.getSmtpPort().trim().isEmpty() &&
+               isValidReceiverEmails(config.getReceiverEmail());
+    }
+    
+    /**
+     * 验证多个接收邮箱地址格式
+     */
+    private boolean isValidReceiverEmails(String emails) {
+        if (emails == null || emails.trim().isEmpty()) {
+            return false;
+        }
+        
+        String[] emailArray = emails.split(";");
+        for (String email : emailArray) {
+            String trimmedEmail = email.trim();
+            if (!trimmedEmail.isEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches()) {
+                return false;
+            }
+        }
+        return emailArray.length > 0;
     }
     
     /**
@@ -113,44 +167,9 @@ public class EmailConfigManager {
     }
     
     /**
-     * 获取SMTP服务器预设列表
+     * 获取所有支持的邮件服务商
      */
-    public static SmtpPreset[] getSmtpPresets() {
-        return new SmtpPreset[] {
-            new SmtpPreset("Gmail", "smtp.gmail.com", "587", true),
-            new SmtpPreset("Outlook/Hotmail", "smtp-mail.outlook.com", "587", true),
-            new SmtpPreset("Yahoo", "smtp.mail.yahoo.com", "587", true),
-            new SmtpPreset("QQ邮箱", "smtp.qq.com", "587", true),
-            new SmtpPreset("163邮箱", "smtp.163.com", "25", false),
-            new SmtpPreset("126邮箱", "smtp.126.com", "25", false),
-            new SmtpPreset("自定义", "", "", true)
-        };
-    }
-    
-    /**
-     * SMTP预设配置类
-     */
-    public static class SmtpPreset {
-        private final String name;
-        private final String host;
-        private final String port;
-        private final boolean useTls;
-        
-        public SmtpPreset(String name, String host, String port, boolean useTls) {
-            this.name = name;
-            this.host = host;
-            this.port = port;
-            this.useTls = useTls;
-        }
-        
-        public String getName() { return name; }
-        public String getHost() { return host; }
-        public String getPort() { return port; }
-        public boolean isUseTls() { return useTls; }
-        
-        @Override
-        public String toString() {
-            return name;
-        }
+    public static EmailConfig.EmailProvider[] getSupportedProviders() {
+        return EmailConfig.EmailProvider.values();
     }
 }

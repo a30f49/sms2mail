@@ -1,21 +1,47 @@
 package com.example.sms2mail;
 
 import android.Manifest;
+import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 123;
-    private EditText etSenderEmail, etSenderPassword, etReceiverEmail;
-    private Button btnSave, btnStartService, btnStopService;
-    private android.widget.TextView tvServiceStatus;
+    private static final String PREFS_SERVICE_STATE = "service_state";
+    private static final String KEY_SERVICE_RUNNING = "is_service_running";
+    
+    private Button btnToggleService;
+    private TextView tvServiceStatus, tvConfigStatus;
+    private boolean isServiceRunning = false;
+    private EmailConfigManager configManager;
+    
+    // 服务状态广播接收器
+    private BroadcastReceiver serviceStatusReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (SmsMonitorService.ACTION_SERVICE_STATUS.equals(intent.getAction())) {
+                boolean running = intent.getBooleanExtra(SmsMonitorService.EXTRA_SERVICE_RUNNING, false);
+                isServiceRunning = running;
+                saveServiceState(running);
+                updateServiceStatus();
+            }
+        }
+    };
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,28 +49,82 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         
         initViews();
+        setupToolbar();
         setupClickListeners();
         requestPermissions();
     }
     
-    private void initViews() {
-        etSenderEmail = findViewById(R.id.etSenderEmail);
-        etSenderPassword = findViewById(R.id.etSenderPassword);
-        etReceiverEmail = findViewById(R.id.etReceiverEmail);
-        btnSave = findViewById(R.id.btnSave);
-        btnStartService = findViewById(R.id.btnStartService);
-        btnStopService = findViewById(R.id.btnStopService);
-        tvServiceStatus = findViewById(R.id.tvServiceStatus);
-        
-        // 加载保存的设置
-        loadSettings();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 注册广播接收器
+        IntentFilter filter = new IntentFilter(SmsMonitorService.ACTION_SERVICE_STATUS);
+        registerReceiver(serviceStatusReceiver, filter);
         updateServiceStatus();
+        updateConfigStatus();
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        
+        if (id == R.id.action_email_config) {
+            startActivity(new Intent(this, EmailConfigActivity.class));
+            return true;
+        } else if (id == R.id.action_about) {
+            showAboutDialog();
+            return true;
+        }
+        
+        return super.onOptionsItemSelected(item);
+    }
+    
+    private void showAboutDialog() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.app_name)
+            .setMessage("版本: 1.0.0\n\n一个简单实用的短信转邮件应用\n\n© 2025 SMS2Mail Team")
+            .setPositiveButton("确定", null)
+            .show();
+    }
+    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // 注销广播接收器
+        try {
+            unregisterReceiver(serviceStatusReceiver);
+        } catch (IllegalArgumentException e) {
+            // 接收器未注册，忽略
+        }
+    }
+    
+    private void initViews() {
+        btnToggleService = findViewById(R.id.btnToggleService);
+        tvServiceStatus = findViewById(R.id.tvServiceStatus);
+        tvConfigStatus = findViewById(R.id.tvConfigStatus);
+        
+        configManager = new EmailConfigManager(this);
+        updateServiceStatus();
+        updateConfigStatus();
+    }
+    
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.app_name);
+        }
     }
     
     private void setupClickListeners() {
-        btnSave.setOnClickListener(v -> saveSettings());
-        btnStartService.setOnClickListener(v -> startSmsService());
-        btnStopService.setOnClickListener(v -> stopSmsService());
+        btnToggleService.setOnClickListener(v -> toggleSmsService());
     }
     
     private void requestPermissions() {
@@ -67,51 +147,95 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     
-    private void saveSettings() {
-        String senderEmail = etSenderEmail.getText().toString().trim();
-        String senderPassword = etSenderPassword.getText().toString().trim();
-        String receiverEmail = etReceiverEmail.getText().toString().trim();
-        
-        if (senderEmail.isEmpty() || senderPassword.isEmpty() || receiverEmail.isEmpty()) {
-            Toast.makeText(this, R.string.msg_fill_all_fields, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        // 保存到SharedPreferences
-        getSharedPreferences("email_settings", MODE_PRIVATE)
-            .edit()
-            .putString("sender_email", senderEmail)
-            .putString("sender_password", senderPassword)
-            .putString("receiver_email", receiverEmail)
-            .apply();
-            
-        Toast.makeText(this, R.string.msg_settings_saved, Toast.LENGTH_SHORT).show();
-    }
+
     
-    private void loadSettings() {
-        android.content.SharedPreferences prefs = getSharedPreferences("email_settings", MODE_PRIVATE);
-        etSenderEmail.setText(prefs.getString("sender_email", ""));
-        etSenderPassword.setText(prefs.getString("sender_password", ""));
-        etReceiverEmail.setText(prefs.getString("receiver_email", ""));
+    private void toggleSmsService() {
+        if (isServiceRunning) {
+            stopSmsService();
+        } else {
+            startSmsService();
+        }
     }
     
     private void startSmsService() {
+        // 检查邮件配置是否完整
+        if (!configManager.isConfigCompleted()) {
+            Toast.makeText(this, R.string.msg_config_required, Toast.LENGTH_SHORT).show();
+            // 打开邮箱配置页面
+            startActivity(new Intent(this, EmailConfigActivity.class));
+            return;
+        }
+        
         Intent serviceIntent = new Intent(this, SmsMonitorService.class);
         startForegroundService(serviceIntent);
+        
+        // 保存服务状态
+        saveServiceState(true);
+        updateServiceStatus();
+        
         Toast.makeText(this, R.string.msg_service_started, Toast.LENGTH_SHORT).show();
-        tvServiceStatus.setText(R.string.status_service_running);
     }
     
     private void stopSmsService() {
         Intent serviceIntent = new Intent(this, SmsMonitorService.class);
         stopService(serviceIntent);
-        Toast.makeText(this, R.string.msg_service_stopped, Toast.LENGTH_SHORT).show();
+        
+        // 保存服务状态
+        saveServiceState(false);
         updateServiceStatus();
+        
+        Toast.makeText(this, R.string.msg_service_stopped, Toast.LENGTH_SHORT).show();
     }
     
     private void updateServiceStatus() {
-        // 简单的状态显示，实际应用中可以检查服务是否真正运行
-        tvServiceStatus.setText(R.string.status_service_stopped);
+        // 检查服务是否真正在运行
+        isServiceRunning = isServiceRunning(SmsMonitorService.class) || getSavedServiceState();
+        
+        if (isServiceRunning) {
+            // 服务运行中 - 显示停止按钮
+            btnToggleService.setText(R.string.btn_stop_monitoring);
+            btnToggleService.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(this, android.R.color.holo_red_dark)));
+            tvServiceStatus.setText(R.string.status_service_running);
+            tvServiceStatus.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_dark));
+        } else {
+            // 服务已停止 - 显示启动按钮
+            btnToggleService.setText(R.string.btn_start_monitoring);
+            btnToggleService.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(this, android.R.color.holo_green_dark)));
+            tvServiceStatus.setText(R.string.status_service_stopped);
+            tvServiceStatus.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
+        }
+    }
+    
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private void updateConfigStatus() {
+        if (configManager.isConfigCompleted()) {
+            tvConfigStatus.setText(R.string.config_status_configured);
+            tvConfigStatus.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_dark));
+        } else {
+            tvConfigStatus.setText(R.string.config_status_not_configured);
+            tvConfigStatus.setTextColor(ContextCompat.getColor(this, android.R.color.holo_orange_dark));
+        }
+    }
+    
+    private void saveServiceState(boolean running) {
+        SharedPreferences prefs = getSharedPreferences(PREFS_SERVICE_STATE, MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_SERVICE_RUNNING, running).apply();
+    }
+    
+    private boolean getSavedServiceState() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_SERVICE_STATE, MODE_PRIVATE);
+        return prefs.getBoolean(KEY_SERVICE_RUNNING, false);
     }
     
     @Override

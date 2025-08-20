@@ -2,25 +2,48 @@
     <string name="app_name">短信转邮件</string>
     
     <!-- 主界面字符串 -->
-    <string name="title_sms_to_email_settings">短信转邮件设置</string>
-    <string name="hint_sender_email">发送邮箱</string>
-    <string name="hint_email_password">邮箱密码/应用专用密码</string>
-    <string name="hint_receiver_email">接收邮箱</string>
-    <string name="btn_save_settings">保存设置</string>
+    <string name="app_description">自动将接收到的短信转发到指定邮箱</string>
     <string name="btn_start_monitoring">启动监控服务</string>
     <string name="btn_stop_monitoring">停止监控服务</string>
     
+    <!-- 邮箱配置页面 -->
+    <string name="title_email_config">SMTP邮箱配置</string>
+    <string name="title_email_config_desc">配置SMTP发送服务器信息以转发短信到邮箱</string>
+    <string name="hint_email_provider">选择SMTP服务商</string>
+    <string name="hint_sender_email">SMTP发送邮箱</string>
+    <string name="hint_email_password">SMTP密码/应用专用密码</string>
+    <string name="hint_receiver_email">接收邮箱地址（多个地址用;分隔）</string>
+    <string name="btn_save_settings">保存SMTP配置</string>
+    <string name="btn_test_config">测试SMTP连接</string>
+    <string name="email_config_tips">💡 提示：Gmail等邮箱需要使用应用专用密码。接收邮箱可以设置多个，用分号(;)分隔，如：user1@gmail.com;user2@qq.com</string>
+    
+    <!-- SMTP配置相关 -->
+    <string name="smtp_config_section">SMTP发送配置</string>
+    <string name="receiver_config_section">接收邮箱配置</string>
+    
+    <!-- 菜单 -->
+    <string name="menu_email_config">SMTP配置</string>
+    <string name="menu_about">关于</string>
+    
     <!-- 提示消息 -->
     <string name="msg_fill_all_fields">请填写所有字段</string>
+    <string name="msg_config_required">请先完成SMTP配置再启动服务</string>
     <string name="msg_settings_saved">设置已保存</string>
+    <string name="msg_save_failed">保存失败，请重试</string>
+    <string name="msg_invalid_email_format">邮箱格式不正确</string>
     <string name="msg_service_started">短信监控服务已启动</string>
     <string name="msg_service_stopped">短信监控服务已停止</string>
     <string name="msg_permissions_required">需要短信和网络权限才能正常工作</string>
     <string name="msg_permissions_denied">权限被拒绝，应用可能无法正常工作</string>
+    <string name="msg_service_starting">正在启动服务...</string>
+    <string name="msg_service_stopping">正在停止服务...</string>
+    <string name="msg_test_email_feature_coming">测试功能即将推出</string>
     
     <!-- 状态文本 -->
     <string name="status_service_running">服务状态: 运行中</string>
     <string name="status_service_stopped">服务状态: 已停止</string>
+    <string name="config_status_configured">SMTP配置: 已完成</string>
+    <string name="config_status_not_configured">SMTP配置: 未完成</string>
     
     <!-- 服务相关 -->
     <string name="notification_channel_name">短信监控服务</string>
