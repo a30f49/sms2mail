@@ -15,6 +15,8 @@
     <string name="hint_receiver_email">接收邮箱地址（多个地址用;分隔）</string>
     <string name="btn_save_settings">保存SMTP配置</string>
     <string name="btn_test_config">测试SMTP连接</string>
+    <string name="btn_test_connection">连接测试</string>
+    <string name="btn_test_send_email">发送测试</string>
     <string name="email_config_tips">💡 提示：Gmail等邮箱需要使用应用专用密码。接收邮箱可以设置多个，用分号(;)分隔，如：user1@gmail.com;user2@qq.com</string>
     
     <!-- SMTP配置相关 -->
@@ -38,6 +40,15 @@
     <string name="msg_service_starting">正在启动服务...</string>
     <string name="msg_service_stopping">正在停止服务...</string>
     <string name="msg_test_email_feature_coming">测试功能即将推出</string>
+    <string name="msg_smtp_test_start">正在测试SMTP连接，请稍候...</string>
+    <string name="msg_smtp_test_success">SMTP连接测试成功</string>
+    <string name="msg_smtp_test_failed">SMTP连接测试失败</string>
+    <string name="msg_smtp_testing">测试中...</string>
+    <string name="msg_smtp_config_invalid">SMTP配置信息不完整或格式错误</string>
+    <string name="msg_test_email_sending">正在发送测试邮件...</string>
+    <string name="msg_test_email_sent_success">测试邮件发送成功</string>
+    <string name="msg_test_email_sent_failed">测试邮件发送失败</string>
+    <string name="msg_test_email_fill_receiver">请填写接收邮箱地址</string>
     
     <!-- 状态文本 -->
     <string name="status_service_running">服务状态: 运行中</string>
