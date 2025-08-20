@@ -79,19 +79,6 @@
 - JDK 8 或更高版本
 - Android SDK 34
 
-### 构建步骤
-```bash
-# 克隆项目
-git clone https://github.com/your-username/sms2mail.git
-cd sms2mail
-
-# 构建Debug版本
-./gradlew assembleDebug
-
-# 构建Release版本
-./gradlew assembleRelease
-```
-
 ## 安全说明
 
 - 所有邮箱配置信息仅存储在本地设备
@@ -110,12 +97,6 @@ A: 检查以下项目：
 - 确认网络连接正常
 - 查看应用日志获取详细错误信息
 
-**Q: Gmail发送失败？**
-A: Gmail需要使用应用专用密码：
-1. 开启两步验证
-2. 生成应用专用密码
-3. 使用应用专用密码而非账户密码
-
 **Q: 服务经常停止？**
 A: 在系统设置中：
 - 关闭电池优化
@@ -132,26 +113,9 @@ A: 在系统设置中：
 - 🔒 安全的本地存储
 - 📱 Material Design界面
 
-## 贡献指南
-
-欢迎提交Issue和Pull Request！
-
-1. Fork项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启Pull Request
-
 ## 许可证
 
-本项目采用MIT许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 联系方式
-
-如有问题或建议，请通过以下方式联系：
-
-- 提交Issue: [GitHub Issues](https://github.com/your-username/sms2mail/issues)
-- 邮箱: your-email@example.com
+本项目采用 `MIT` 许可证
 
 ---
 
