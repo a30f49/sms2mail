@@ -1,0 +1,1 @@
+keytool -genkey -v -keystore sms2mail-release.keystore -alias sms2mail-key -keyalg RSA -keysize 2048 -validity 10000 -storepass sms2dev@ -keypass sms2dev@ -dname "CN=dev, OU=dev, O=smallsaascloud, L=GZ, ST=GD, C=CN"
