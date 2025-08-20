@@ -130,23 +130,65 @@
                 android:background="@drawable/bg_tips"
                 android:padding="12dp" />
 
+            <!-- SMTP测试进度条 -->
+            <ProgressBar
+                android:id="@+id/progressBarTest"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvTestStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"
+                android:gravity="center"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="end">
+                android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/btnTest"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
+                <!-- 测试按钮组 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/btn_test_config"
-                    android:layout_marginEnd="16dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginBottom="16dp">
 
+                    <Button
+                        android:id="@+id/btnTest"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/btn_test_connection"
+                        android:layout_marginEnd="8dp" />
+
+                    <Button
+                        android:id="@+id/btnTestReceiver"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/btn_test_send_email"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+
+                <!-- 保存按钮 -->
                 <Button
                     android:id="@+id/btnSave"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/btn_save_settings" />
 
