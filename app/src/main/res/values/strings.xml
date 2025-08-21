@@ -5,6 +5,7 @@
     <string name="app_description">自动将接收到的短信转发到指定邮箱</string>
     <string name="btn_start_monitoring">启动监控服务</string>
     <string name="btn_stop_monitoring">停止监控服务</string>
+    <string name="btn_view_logs">查看日志</string>
     
     <!-- 邮箱配置页面 -->
     <string name="title_email_config">SMTP邮箱配置</string>

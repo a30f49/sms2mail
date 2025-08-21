@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREFS_SERVICE_STATE = "service_state";
     private static final String KEY_SERVICE_RUNNING = "is_service_running";
     
-    private Button btnToggleService;
+    private Button btnToggleService, btnViewLogs;
     private TextView tvServiceStatus, tvConfigStatus;
     private boolean isServiceRunning = false;
     private EmailConfigManager configManager;
@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
     
     private void initViews() {
         btnToggleService = findViewById(R.id.btnToggleService);
+        btnViewLogs = findViewById(R.id.btnViewLogs);
         tvServiceStatus = findViewById(R.id.tvServiceStatus);
         tvConfigStatus = findViewById(R.id.tvConfigStatus);
         
@@ -125,6 +126,9 @@ public class MainActivity extends AppCompatActivity {
     
     private void setupClickListeners() {
         btnToggleService.setOnClickListener(v -> toggleSmsService());
+        btnViewLogs.setOnClickListener(v -> {
+            startActivity(new Intent(this, LogActivity.class));
+        });
     }
     
     private void requestPermissions() {

@@ -36,6 +36,11 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".LogActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
         <receiver 
             android:name=".SmsReceiver"
             android:exported="true"

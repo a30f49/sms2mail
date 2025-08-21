@@ -81,13 +81,29 @@
         </androidx.cardview.widget.CardView>
 
         <!-- 主要操作按钮 -->
-        <Button
-            android:id="@+id/btnToggleService"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="@string/btn_start_monitoring"
-            android:textSize="16sp"
-            android:backgroundTint="#4CAF50" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnToggleService"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="@string/btn_start_monitoring"
+                android:textSize="16sp"
+                android:backgroundTint="#4CAF50" />
+
+            <Button
+                android:id="@+id/btnViewLogs"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:text="@string/btn_view_logs"
+                android:textSize="16sp" />
+        </LinearLayout>
 
     </LinearLayout>
 
