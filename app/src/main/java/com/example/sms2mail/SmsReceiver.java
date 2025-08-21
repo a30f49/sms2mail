@@ -25,10 +25,11 @@ public class SmsReceiver extends BroadcastReceiver {
                         String message = sms.getDisplayMessageBody();
                         
                         Log.d(TAG, context.getString(R.string.log_sms_received, sender, message));
-                        logSmsToDatabase(context, sender, message, "Forwarding");
+                        long logId = logSmsToDatabase(context, sender, message, "Forwarding");
                         
                         // 启动邮件发送服务
                         Intent emailIntent = new Intent(context, EmailService.class);
+                        emailIntent.putExtra("logId", logId);
                         emailIntent.putExtra("sender", sender);
                         emailIntent.putExtra("message", message);
                         context.startService(emailIntent);
@@ -38,7 +39,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    private void logSmsToDatabase(Context context, String sender, String body, String forwardStatus) {
+    private long logSmsToDatabase(Context context, String sender, String body, String forwardStatus) {
         LogDatabaseHelper dbHelper = new LogDatabaseHelper(context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
@@ -48,7 +49,8 @@ public class SmsReceiver extends BroadcastReceiver {
         values.put(LogDatabaseHelper.COLUMN_TIMESTAMP, System.currentTimeMillis());
         values.put(LogDatabaseHelper.COLUMN_FORWARD_STATUS, forwardStatus);
 
-        db.insert(LogDatabaseHelper.TABLE_LOGS, null, values);
+        long id = db.insert(LogDatabaseHelper.TABLE_LOGS, null, values);
         db.close();
+        return id;
     }
 }
