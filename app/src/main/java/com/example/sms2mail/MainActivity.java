@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         // 注册广播接收器
         IntentFilter filter = new IntentFilter(SmsMonitorService.ACTION_SERVICE_STATUS);
-        registerReceiver(serviceStatusReceiver, filter);
+        registerReceiver(serviceStatusReceiver, filter, RECEIVER_NOT_EXPORTED);
         updateServiceStatus();
         updateConfigStatus();
     }
