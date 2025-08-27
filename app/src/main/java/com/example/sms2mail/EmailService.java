@@ -2,7 +2,6 @@ package com.example.sms2mail;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.util.Log;
 import java.util.Properties;
 import javax.mail.Authenticator;
@@ -13,8 +12,6 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 
 public class EmailService extends IntentService {
     private static final String TAG = "EmailService";
@@ -25,7 +22,7 @@ public class EmailService extends IntentService {
     
     @Override
     protected void onHandleIntent(Intent intent) {
-        long logId = intent.getLongExtra("logId", -1);
+        long smsLogId = intent.getLongExtra("smsLogId", -1);
         String smsSender = intent.getStringExtra("sender");
         String smsMessage = intent.getStringExtra("message");
         
@@ -34,17 +31,31 @@ public class EmailService extends IntentService {
         
         if (!configManager.isConfigValid(config)) {
             Log.e(TAG, getString(R.string.log_email_settings_incomplete));
-            if (logId != -1) {
-                updateLogStatus(logId, "Failed: Invalid Config");
+            if (smsLogId != -1) {
+                updateSmsStatus(smsLogId, "Failed: Invalid Config");
             }
             return;
         }
         
-        sendEmail(config, smsSender, smsMessage, logId);
+        sendEmail(config, smsSender, smsMessage, smsLogId);
     }
     
-    private void sendEmail(EmailConfig config, String smsSender, String smsMessage, long logId) {
+    private void sendEmail(EmailConfig config, String smsSender, String smsMessage, long smsLogId) {
+        LogManager logManager = LogManager.getInstance(this);
+        long emailLogId = -1;
+        
         try {
+            // 记录邮件发送日志
+            if (smsLogId != -1) {
+                emailLogId = logManager.logEmailSending(
+                    smsLogId, 
+                    smsSender, 
+                    smsMessage, 
+                    config.getReceiverEmail(), 
+                    config.getProvider().name()
+                );
+            }
+            
             Properties props = createSmtpProperties(config);
             
             Session session = Session.getInstance(props, new Authenticator() {
@@ -75,32 +86,36 @@ public class EmailService extends IntentService {
             Transport.send(message);
             Log.d(TAG, getString(R.string.log_email_sent_success) + " [" + config.getProvider().getDisplayName() + 
                       "] 发送到 " + receiverEmails.length + " 个邮箱");
-            if (logId != -1) {
-                updateLogStatus(logId, "Success");
+            
+            if (smsLogId != -1) {
+                updateSmsStatus(smsLogId, "Success");
+            }
+            if (emailLogId != -1) {
+                logManager.updateEmailResult(emailLogId, true, "");
             }
             
         } catch (MessagingException e) {
             Log.e(TAG, getString(R.string.log_email_sent_failed, e.getMessage()));
-            if (logId != -1) {
-                updateLogStatus(logId, "Failed: " + e.getMessage());
+            if (smsLogId != -1) {
+                updateSmsStatus(smsLogId, "Failed: " + e.getMessage());
+            }
+            if (emailLogId != -1) {
+                logManager.updateEmailResult(emailLogId, false, e.getMessage());
             }
         } catch (Exception e) {
             Log.e(TAG, getString(R.string.log_email_sent_failed, e.getMessage()));
-            if (logId != -1) {
-                updateLogStatus(logId, "Failed: " + e.getMessage());
+            if (smsLogId != -1) {
+                updateSmsStatus(smsLogId, "Failed: " + e.getMessage());
+            }
+            if (emailLogId != -1) {
+                logManager.updateEmailResult(emailLogId, false, e.getMessage());
             }
         }
     }
 
-    private void updateLogStatus(long logId, String status) {
-        LogDatabaseHelper dbHelper = new LogDatabaseHelper(this);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(LogDatabaseHelper.COLUMN_FORWARD_STATUS, status);
-
-        db.update(LogDatabaseHelper.TABLE_LOGS, values, LogDatabaseHelper.COLUMN_ID + " = ?", new String[]{String.valueOf(logId)});
-        db.close();
+    private void updateSmsStatus(long smsLogId, String status) {
+        LogManager logManager = LogManager.getInstance(this);
+        logManager.updateSmsProcessStatus(smsLogId, true, status);
     }
     
     /**

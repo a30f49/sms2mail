@@ -1,7 +1,5 @@
 package com.example.sms2mail;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,7 +12,6 @@ public class LogActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private LogAdapter logAdapter;
     private List<LogEntry> logEntries;
-    private LogDatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +22,6 @@ public class LogActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         logEntries = new ArrayList<>();
-        dbHelper = new LogDatabaseHelper(this);
 
         loadLogEntries();
 
@@ -34,20 +30,41 @@ public class LogActivity extends AppCompatActivity {
     }
 
     private void loadLogEntries() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.query(LogDatabaseHelper.TABLE_LOGS, null, null, null, null, null, LogDatabaseHelper.COLUMN_TIMESTAMP + " DESC");
-
-        if (cursor.moveToFirst()) {
-            do {
-                long id = cursor.getLong(cursor.getColumnIndexOrThrow(LogDatabaseHelper.COLUMN_ID));
-                String sender = cursor.getString(cursor.getColumnIndexOrThrow(LogDatabaseHelper.COLUMN_SENDER));
-                String body = cursor.getString(cursor.getColumnIndexOrThrow(LogDatabaseHelper.COLUMN_BODY));
-                long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(LogDatabaseHelper.COLUMN_TIMESTAMP));
-                String forwardStatus = cursor.getString(cursor.getColumnIndexOrThrow(LogDatabaseHelper.COLUMN_FORWARD_STATUS));
-                logEntries.add(new LogEntry(id, sender, body, timestamp, forwardStatus));
-            } while (cursor.moveToNext());
+        LogManager logManager = LogManager.getInstance(this);
+        logEntries.clear();
+        
+        // 加载短信日志作为统一的日志条目
+        for (SmsLog smsLog : logManager.getAllSmsLogs()) {
+            String status = smsLog.getProcessStatus();
+            if (smsLog.isProcessed()) {
+                // 获取相关的邮件日志以构建完整的状态信息
+                StringBuilder statusBuilder = new StringBuilder(status);
+                for (EmailLog emailLog : logManager.getEmailLogsBySmsId(smsLog.getId())) {
+                    if (statusBuilder.length() > 0) {
+                        statusBuilder.append(" | ");
+                    }
+                    statusBuilder.append("Email: ")
+                        .append(emailLog.isSuccess() ? "Sent" : "Failed")
+                        .append(emailLog.getErrorMessage() != null && !emailLog.getErrorMessage().isEmpty() ? 
+                                " - " + emailLog.getErrorMessage() : "");
+                }
+                status = statusBuilder.toString();
+            }
+            
+            logEntries.add(new LogEntry(
+                smsLog.getId(),
+                smsLog.getSender(),
+                smsLog.getMessage(),
+                smsLog.getReceivedTime().getTime(),
+                status
+            ));
         }
-        cursor.close();
-        db.close();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadLogEntries();
+        logAdapter.notifyDataSetChanged();
     }
 }

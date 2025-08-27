@@ -63,6 +63,7 @@ public class SmsMonitorService extends Service {
     private void sendServiceStatusBroadcast(boolean isRunning) {
         Intent broadcast = new Intent(ACTION_SERVICE_STATUS);
         broadcast.putExtra(EXTRA_SERVICE_RUNNING, isRunning);
+        broadcast.setPackage(getPackageName());
         sendBroadcast(broadcast);
     }
     
