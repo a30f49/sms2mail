@@ -11,4 +11,12 @@
     <!-- 系统栏颜色 - 与系统状态栏保持一致 -->
     <color name="system_bar_color">#FF2196F3</color>
     <color name="system_bar_color_dark">#FF1976D2</color>
+    
+    <!-- Log specific colors -->
+    <color name="sms_success">#4CAF50</color>
+    <color name="email_success">#2196F3</color>
+    <color name="failure_red">#F44336</color>
+    <color name="status_background_sent">#2196F3</color>
+    <color name="status_background_failed">#F44336</color>
+    <color name="status_background_sms">#4CAF50</color>
 </resources>
